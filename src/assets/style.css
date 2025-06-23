@@ -1,4 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@plugin "daisyui";
 
+:root {
+  --color-primary: #463581;
+  --color-backgroundDark: #ffffff;
+}
+[data-theme="dark"] {
+  --color-backgroundDark: #141122;
+}
