@@ -1,12 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-@plugin "daisyui";
+/* src/assets/style.css */
 
-:root {
-  --color-primary: #463581;
-  --color-backgroundDark: #ffffff;
+/* Importa la fuente Inter de Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* Importaciones de Tailwind CSS */
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* La variante personalizada @custom-variant dark es útil si no usas darkMode: 'class' */
+/* Dado que hemos añadido 'darkMode: class' en tailwind.config.js, esta regla puede ser redundante o generar un warning, */
+/* pero la mantengo como la proporcionaste. Tailwind debería manejar el modo oscuro automáticamente con la configuración. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Reglas CSS personalizadas que se aplican con @apply */
+.notification-tab > .active {    
+    @apply text-blue-500 border-b-blue-500 hover:text-blue-500;
 }
-[data-theme="dark"] {
-  --color-backgroundDark: #141122;
+.order-tab > .active {
+    @apply bg-blue-500 text-white hover:text-white;
+}
+/* La clase .main.active se gestiona directamente con la lógica de Vue en el componente Home.vue */
+/* para controlar el tamaño y margen del 'main' cuando el sidebar se pliega/despliega. */
+.main.active {
+    @apply md:w-full md:ml-0;
 }
