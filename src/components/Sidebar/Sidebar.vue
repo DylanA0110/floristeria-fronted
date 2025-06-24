@@ -181,7 +181,14 @@
             </router-link>
           </li>
 
-          
+          <li class="items-center">
+            <a
+              href="#"
+              @click.prevent="logout" class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+            >
+              <i class="fas fa-sign-out-alt text-blueGray-300 mr-2 text-sm"></i> Cerrar Sesión
+            </a>
+          </li>
         </ul>
 
         <hr class="my-4 md:min-w-full" />
@@ -211,14 +218,18 @@
             </router-link>
           </li>
         </ul>
-
-        </div>
+      </div>
+      <div class="mt-auto px-4 py-3 border-t border-gray-300 text-center text-sm text-gray-600">
+        <span v-if="username">Usuario: {{ username }}</span>
+        <span v-else>No has iniciado sesión</span>
+      </div>
     </div>
   </nav>
 </template>
 <script>
 import NotificationDropdown from "@/components/Dropdowns/NotificationDropdown.vue";
 import UserDropdown from "@/components/Dropdowns/UserDropdown.vue";
+import { useAuthStore } from '../../store/auth'; // ajusta ruta según tu estructura
 
 export default {
   data() {
@@ -226,9 +237,21 @@ export default {
       collapseShow: "hidden",
     };
   },
+  computed: {
+    username() {
+      const authStore = useAuthStore();
+      return authStore.username;
+    },
+  },
   methods: {
-    toggleCollapseShow: function (classes) {
+    toggleCollapseShow(classes) {
       this.collapseShow = classes;
+    },
+    // NUEVO: Método para cerrar sesión
+    logout() {
+      const authStore = useAuthStore();
+      authStore.logout(); // Llama a la acción de logout de tu store
+      this.$router.push('/login'); // Redirige a la página de login
     },
   },
   components: {

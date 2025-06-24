@@ -57,7 +57,7 @@
 
 <script>
 import { createPopper } from "@popperjs/core";
-import userImage from '../../assets/images/user.png'; // Correct relative path
+import userImage from '../../assets/images/user.png';
 
 export default {
   data() {
