@@ -584,7 +584,7 @@
 import { useRoute } from 'vue-router'; 
 
 // Importa TheSidebar - Asegúrate de que la ruta es correcta
-import TheSidebar from '../componentes/TheSideBar.vue';
+import TheSidebar from '../componentes/TheSidebar.vue';
 
 export default {
   components: {
