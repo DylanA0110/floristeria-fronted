@@ -1,37 +1,167 @@
 // tailwind.config.js
-/** @type {import('tailwindcss').Config} */
-export default {
-  darkMode: 'class',
-  content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
-    "./**/*.html",
-    "./dist/**/*.js"
-  ],
-  theme: {
-    extend: {
-      fontFamily: {
-        'inter': ["'Inter'", 'sans-serif']
-      },
-      backgroundImage: {
-        'select-arrow': 'url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZD0iTTExLjk5OTcgMTMuMTcxNEwxNi45NDk1IDguMjIxNjhMMTguMzYzNyA5LjYzNTg5TDExLjk5OTcgMTUuOTk5OUw1LjYzNTc0IDkuNjM1ODlMNy4wNDk5NiA4LjIyMTY4TDExLjk5OTcgMTMuMTcxNFoiIGZpbGw9InJnYmEoMTU2LDE2MywxNzUsMSk+PC9wYXRoPjwvc3ZnPj")'
-      },
-      colors: {
-        // Define tu color oscuro personalizado
-        darkBackground: '#12403B',
-        // Si necesitas un gris oscuro diferente para texto o bordes en modo oscuro
-        darkText: '#E0E0E0', // Un color más claro para el texto en modo oscuro
-        darkBorder: '#2A4E4C', // Un color de borde que combine
-        darkCard: '#1A4A48',
-        lightCard: '#9b9b9b',
-        cardCerrar: '#F2811D', // Un color para las tarjetas en modo oscuro
-        
-        // Colores específicos para el sidebar en modo claro (AÑADIDOS)
-        sidebarBgLight: '#fad3a4', // Fondo naranja del sidebar en modo claro
-        sidebarItemActiveBgLight: '#F0F0F0', // Fondo gris claro para el ítem activo/hover en modo claro
-        sidebarTextLight: '#000000', // Texto negro en modo claro
-      }
+const plugin = require("tailwindcss/plugin");
+const colors = require("tailwindcss/colors");
+
+module.exports = {
+  purge: {
+    enabled: true,
+    content: [
+      "./**/*.html",
+      "./*.html",
+      "./**/*.js",
+      "./*.js",
+      "./**/*.vue",
+      "./*.vue",
+    ],
+    options: {
+      safelist: [],
     },
   },
-  plugins: [],
-}
+  theme: {
+    // Es importante no sobrescribir 'colors' directamente aquí si queremos mantener los colores predeterminados de Tailwind
+    // Si necesitas mantener los colores como 'blueGray', 'red', 'emerald', etc., asegúrate de extenderlos en 'extend'.
+    // Tu configuración actual con `...colors` ya los incluye.
+    // Lo más seguro es usar 'extend' para agregar tus colores personalizados.
+    extend: {
+      colors: {
+        // Aquí defines tus colores personalizados para la floristería
+        floristeria: {
+          // Puedes darles nombres descriptivos o números si prefieres
+          // Por ejemplo, 'darkGreen', 'mediumGreen', 'gold', 'orangePrimary', 'orangeAccent'
+          darkGreen: '#12403B',    // Un verde muy oscuro
+          mediumGreen: '#31594E',  // Un verde intermedio
+          gold: '#A67D32',         // Un dorado/marrón claro
+          orangePrimary: '#F2921D',// Un naranja vibrante
+          orangeAccent: '#F2811D', // Un naranja un poco más intenso/rojizo
+        },
+        // Mantenemos los colores existentes de Tailwind si los usas en alguna parte,
+        // o si los sobrescribes aquí, se usarán tus nuevas definiciones.
+        // Por ejemplo, si quieres que tu 'emerald' o 'blueGray' default sea de tu paleta:
+        // emerald: {
+        //   600: '#12403B', // Si quieres que tu bg-emerald-600 ahora sea el darkGreen de tu floristería
+        //   // ... puedes definir otros tonos de emerald aquí si los vas a usar
+        // },
+        // blueGray: {
+        //   200: '#F3F4F6', // Un gris azulado claro, para fondos de footer, etc.
+        //   // ...
+        // },
+      },
+      minHeight: {
+        "screen-75": "75vh",
+      },
+      fontSize: {
+        "55": "55rem",
+      },
+      opacity: {
+        "80": ".8",
+      },
+      zIndex: {
+        "2": 2,
+        "3": 3,
+      },
+      inset: {
+        "-100": "-100%",
+        "-225-px": "-225px",
+        "-160-px": "-160px",
+        "-150-px": "-150px",
+        "-94-px": "-94px",
+        "-50-px": "-50px",
+        "-29-px": "-29px",
+        "-20-px": "-20px",
+        "25-px": "25px",
+        "40-px": "40px",
+        "95-px": "95px",
+        "145-px": "145px",
+        "195-px": "195px",
+        "210-px": "210px",
+        "260-px": "260px",
+      },
+      height: {
+        "95-px": "95px",
+        "70-px": "70px",
+        "350-px": "350px",
+        "500-px": "500px",
+        "600-px": "600px",
+      },
+      maxHeight: {
+        "860-px": "860px",
+      },
+      maxWidth: {
+        "100-px": "100px",
+        "120-px": "120px",
+        "150-px": "150px",
+        "180-px": "180px",
+        "200-px": "200px",
+        "210-px": "210px",
+        "580-px": "580px",
+      },
+      minWidth: {
+        "140-px": "140px",
+        "48": "12rem",
+      },
+      backgroundSize: {
+        full: "100%",
+      },
+    },
+  },
+  variants: [
+    "responsive",
+    "group-hover",
+    "focus-within",
+    "first",
+    "last",
+    "odd",
+    "even",
+    "hover",
+    "focus",
+    "active",
+    "visited",
+    "disabled",
+  ],
+  plugins: [
+    require("@tailwindcss/forms"),
+    plugin(function ({ addComponents, theme }) {
+      const screens = theme("screens", {});
+      addComponents([
+        {
+          ".container": { width: "100%" },
+        },
+        {
+          [`@media (min-width: ${screens.sm})`]: {
+            ".container": {
+              "max-width": "640px",
+            },
+          },
+        },
+        {
+          [`@media (min-width: ${screens.md})`]: {
+            ".container": {
+              "max-width": "768px",
+            },
+          },
+        },
+        {
+          [`@media (min-width: ${screens.lg})`]: {
+            ".container": {
+              "max-width": "1024px",
+            },
+          },
+        },
+        {
+          [`@media (min-width: ${screens.xl})`]: {
+            ".container": {
+              "max-width": "1280px",
+            },
+          },
+        },
+        {
+          [`@media (min-width: ${screens["2xl"]})`]: {
+            ".container": {
+              "max-width": "1280px",
+            },
+          },
+        },
+      ]);
+    }),
+  ],
+};

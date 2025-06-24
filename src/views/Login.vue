@@ -44,30 +44,33 @@
         </div>
     </section>
 </template>
-
 <script>
 import loginImg from '../assets/images/LoginDashboard.jpg'
 
 export default {
-    name: "Login",
-    data() {
-        return {
-            email: "",
-            password: "",
-            error: "",
-            showPassword: false,
-            loginImg: loginImg,    
-        };
-    },
-    methods: {
-        login() {
-            this.error = "";
-            if (this.email === "admin@demo.com" && this.password === "12345") {
-                this.$router.push({ name: "Home" });
-            } else {
-                this.error = "Correo o contraseña incorrectos.";
-            }
-        },
-    },
+  name: "Login",
+  data() {
+    return {
+      email: "",
+      password: "",
+      error: "",
+      showPassword: false,
+      loginImg: loginImg,
+    };
+  },
+  mounted() {
+    console.log('Login montado');
+  },
+  methods: {
+    login() {
+      this.error = "";
+      if (this.email === "admin@demo.com" && this.password === "12345") {
+        this.$router.push('/admin/dashboard');  // redirige directo por path válido
+      } else {
+        this.error = "Correo o contraseña incorrectos.";
+      }
+    }
+  },
 };
 </script>
+

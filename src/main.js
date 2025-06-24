@@ -5,6 +5,12 @@ import router from './router';
 
 import './assets/style.css';
 import { Icon } from '@iconify/vue';
+import { createWebHistory, createRouter } from "vue-router";
+
+// styles
+
+import "./assets/tailwind.css";
+
 
 const app = createApp(App);
 
