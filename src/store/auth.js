@@ -1,40 +1,68 @@
 import { defineStore } from 'pinia';
 
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    // Inicializa el token y username directamente desde localStorage
-    // Si no existen en localStorage, serán null
-    token: localStorage.getItem('token') || null,
-    username: localStorage.getItem('username') || null,
-  }),
+  state: () => {
+    const storedToken = localStorage.getItem('token');
+    const storedUsername = localStorage.getItem('username');
+
+    console.group('Auth Store Initialization');
+    console.log('Init: Token en localStorage:', storedToken);
+    console.log('Init: Username en localStorage:', storedUsername);
+    console.groupEnd();
+
+    return {
+      token: storedToken,
+      username: storedUsername,
+    };
+  },
   getters: {
-    // Añadir un getter para verificar si el usuario está autenticado
     isAuthenticated: (state) => {
-      return !!state.token; // Retorna true si hay un token, false si es null o vacío
+      // LOG PARA DEPURACIÓN EN GETTER
+      console.log('Getter isAuthenticated: Token presente?', !!state.token);
+      return !!state.token; 
     },
-    // Opcional: getters para acceder a token y username fácilmente
     getUserToken: (state) => state.token,
-    getUsername: (state) => state.username,
+    getUsername: (state) => {
+      // LOG PARA DEPURACIÓN EN GETTER DE USERNAME
+      console.log('Getter getUsername: Valor actual:', state.username);
+      return state.username;
+    },
   },
   actions: {
     setUser(token, username) {
+      console.group('Auth Store Action: setUser');
+      console.log('setUser: Recibido Token:', token);
+      console.log('setUser: Recibido Username:', username);
+
       this.token = token;
-      this.username = username;
+      this.username = username; // Asegurándonos de que 'this.username' se actualiza
+
       localStorage.setItem('token', token);
-      localStorage.setItem('username', username);
+      localStorage.setItem('username', username); // Asegurándonos de que 'username' se guarda
+
+      console.log('setUser: Token guardado en estado:', this.token);
+      console.log('setUser: Username guardado en estado:', this.username);
+      console.log('setUser: Token en localStorage (después de set):', localStorage.getItem('token'));
+      console.log('setUser: Username en localStorage (después de set):', localStorage.getItem('username'));
+      console.groupEnd();
     },
-    logout() {
+    
+    async logout() {
+      console.group('Auth Store Action: logout');
+      console.log('logout: Iniciando...');
+
       this.token = null;
-      this.username = null;
+      this.username = null; // Asegurándonos de que el estado se limpia
+
       localStorage.removeItem('token');
-      localStorage.removeItem('username');
+      localStorage.removeItem('username'); // Asegurándonos de que localStorage se limpia
+
+      console.log('logout: Token en estado:', this.token);
+      console.log('logout: Username en estado:', this.username);
+      console.log('logout: Token en localStorage (después de remove):', localStorage.getItem('token'));
+      console.log('logout: Username en localStorage (después de remove):', localStorage.getItem('username'));
+      console.log('logout: isAuthenticated ahora es:', this.isAuthenticated);
+      console.groupEnd();
     },
-    // El método loadFromStorage ya no es estrictamente necesario si inicializas el state directamente,
-    // pero podrías mantenerlo si tienes alguna razón específica para cargarlo manualmente después.
-    // Si se mantiene, no debería ser necesario llamarlo explícitamente en el setup de la app.
-    // loadFromStorage() {
-    //   this.token = localStorage.getItem('token');
-    //   this.username = localStorage.getItem('username');
-    // },
   }
 });

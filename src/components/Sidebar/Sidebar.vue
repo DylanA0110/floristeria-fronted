@@ -14,7 +14,7 @@
       </button>
       <router-link
         class="md:block text-left md:pb-2 text-blueGray-600 mr-0 inline-block whitespace-nowrap text-sm uppercase font-bold p-4 px-0"
-        to="/"
+        to="/admin/dashboard"
       >
         Floristería Sacuanjoche
       </router-link>
@@ -171,20 +171,12 @@
           Acceso de Usuario
         </h6>
         <ul class="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
-          <li class="items-center">
-            <router-link
-              class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
-              to="/auth/login"
-            >
-              <i class="fas fa-fingerprint text-blueGray-300 mr-2 text-sm"></i>
-              Login
-            </router-link>
-          </li>
+         
 
           <li class="items-center">
             <a
               href="#"
-              @click.prevent="logout" class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
+              @click.prevent="handleLogout" class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
             >
               <i class="fas fa-sign-out-alt text-blueGray-300 mr-2 text-sm"></i> Cerrar Sesión
             </a>
@@ -230,33 +222,50 @@
 import NotificationDropdown from "@/components/Dropdowns/NotificationDropdown.vue";
 import UserDropdown from "@/components/Dropdowns/UserDropdown.vue";
 import { useAuthStore } from '../../store/auth'; // ajusta ruta según tu estructura
+import { useRouter } from 'vue-router'; // <--- IMPORTANTE: Importar useRouter
+import { ref, computed } from 'vue'; // <--- Importar ref y computed para Composition API
 
 export default {
-  data() {
-    return {
-      collapseShow: "hidden",
+  // Ya no necesitas 'components' aquí si los importas y usas directamente en template
+  // o si los componentes de dropdown se usan dentro de UserDropdown/NotificationDropdown
+
+  setup() {
+    const authStore = useAuthStore();
+    const router = useRouter();
+
+    // Estado local reactivo para el sidebar (equivalente a data())
+    const collapseShow = ref("hidden");
+
+    // Método para alternar la visibilidad del sidebar (equivalente a methods.toggleCollapseShow)
+    const toggleCollapseShow = (classes) => {
+      collapseShow.value = classes;
     };
-  },
-  computed: {
-    username() {
-      const authStore = useAuthStore();
-      return authStore.username;
-    },
-  },
-  methods: {
-    toggleCollapseShow(classes) {
-      this.collapseShow = classes;
-    },
-    // NUEVO: Método para cerrar sesión
-    logout() {
-      const authStore = useAuthStore();
-      authStore.logout(); // Llama a la acción de logout de tu store
-      this.$router.push('/login'); // Redirige a la página de login
-    },
-  },
-  components: {
-    NotificationDropdown,
-    UserDropdown,
+
+    // En TheSidebar.vue (dentro de setup())
+    const username = computed(() => {
+      return authStore.username ? authStore.username : 'Invitado'; 
+    });
+
+    // Método para cerrar sesión (equivalente a methods.logout, pero con await y mejor manejado)
+    const handleLogout = async () => {
+      console.log('Intentando cerrar sesión...');
+      await authStore.logout(); // *** Usa await aquí para esperar que el store se actualice ***
+      
+      console.log('Logout completado en el componente. Redirigiendo a /login...');
+      router.push('/login'); // Redirige después de que el store se haya actualizado
+    };
+
+    return {
+      collapseShow,
+      toggleCollapseShow,
+      username,
+      handleLogout,
+      // No necesitas retornar NotificationDropdown y UserDropdown si ya los importas
+      // y los usas directamente en el template de este componente padre,
+      // a menos que este sea el archivo del Layout donde se componen.
+      NotificationDropdown, // Si estos son componentes que se usan en el template de ESTE archivo
+      UserDropdown,         // entonces se deben retornar para que el template pueda acceder a ellos.
+    };
   },
 };
 </script>

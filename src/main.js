@@ -19,13 +19,12 @@ const authStore = useAuthStore();
 
 // Función para validar token y usuario en backend
 async function validateToken() {
-  if (!authStore.token) return; // Sin token no hay nada que validar
+  if (!authStore.token) return; // a ver si hay algo XD
 
   try {
     await api.get('/usuario/profile'); // Petición protegida para validar token y existencia usuario
-    // Token válido y usuario existe, sigue normal
+    // Token válido y usuario existe, si sigue perrito
   } catch (error) {
-    // Si falla, token inválido o usuario eliminado
     authStore.logout();
     router.push('/login');
   }
