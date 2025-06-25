@@ -124,20 +124,7 @@
                   class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
                 />
               </div>
-              <div class="mb-a">
-                  <input
-                    v-model="currentCliente.id_cliente"
-                    type="number"
-                      placeholder="ID Cliente *"
-                      required
-                      class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
-                      :disabled="isEditing"
-                    />
-                    <p v-if="submitted && !currentCliente.id_cliente && !isEditing" class="text-red-500 text-xs mt-1">
-                      El ID de Cliente es requerido
-                    </p>
-  
-              </div>
+            
               
               <div class="flex justify-end pt-4 border-t">
                 <button
@@ -277,7 +264,7 @@ async function submitClienteForm()
     const clienteToSent = {
       id_Cliente: currentCliente.value.id_cliente,
       Nombre_Cliente:currentCliente.value.Nombre_Cliente,
-      telefono:currentCliente.value.Telefono
+      Telefono:currentCliente.value.Telefono
 
     }
 

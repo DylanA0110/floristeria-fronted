@@ -10,7 +10,7 @@ import Dashboard from "../views/admin/Dashboard.vue";
 import Settings from "../views/admin/Settings.vue";
 import Empleado from "../views/admin/Empleado.vue";
 import Clientes from '../views/admin/Clientes.vue'; // Asegúrate de que esta ruta sea correcta
-
+import Pedido from '../views/admin/Pedido.vue';
 // views for Auth layout
 import Login from "../views/Login.vue";
 
@@ -54,6 +54,11 @@ const routes = [
         path: 'clientes',
         component: Clientes,
         meta: { showStats: false }
+      },
+      {
+        path:'pedido',
+        component:Pedido,
+        meta:{showStats:false}
       }
     ]
   },

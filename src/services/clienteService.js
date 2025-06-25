@@ -57,7 +57,7 @@ export const clienteService = {
       // Estructura de datos limpia
       const payload = {
         Nombre_Cliente: clienteData.Nombre_Cliente.trim(),
-        Telefono: clienteData.Telefono?.trim() || null
+        Telefono: clienteData.Telefono
       };
 
       const response = await api.post(BASE_URL, payload);
