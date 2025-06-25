@@ -204,31 +204,9 @@
         </ul>
 
         <hr class="my-4 md:min-w-full" />
-        <h6
-          class="md:min-w-full text-floristeria-darkGreen text-xs uppercase font-bold block pt-1 pb-4 no-underline"
-        >
-          Páginas Públicas
-        </h6>
+        
         <ul class="md:flex-col md:min-w-full flex flex-col list-none md:mb-4">
-          <li class="items-center">
-            <router-link
-              class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
-              to="/landing"
-            >
-              <i class="fas fa-newspaper text-blueGray-300 mr-2 text-sm"></i>
-              Página Principal
-            </router-link>
-          </li>
-
-          <li class="items-center">
-            <router-link
-              class="text-blueGray-700 hover:text-blueGray-500 text-xs uppercase py-3 font-bold block"
-              to="/profile"
-            >
-              <i class="fas fa-user-circle text-blueGray-300 mr-2 text-sm"></i>
-              Perfil
-            </router-link>
-          </li>
+          
         </ul>
       </div>
       <div class="mt-auto px-4 py-3 border-t border-gray-300 text-center text-sm text-gray-600">
