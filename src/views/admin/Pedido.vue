@@ -1,24 +1,18 @@
 <template>
-  <div
-    class="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded"
-    :class="[color === 'light' ? 'bg-white' : 'bg-emerald-900 text-white']"
-  >
+  <div class="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded bg-white">
     <div class="rounded-t mb-0 px-4 py-3 border-0">
       <div class="flex flex-wrap items-center">
         <div class="relative w-full px-4 max-w-full flex-grow flex-1">
-          <h3
-            class="font-semibold text-lg"
-            :class="[color === 'light' ? 'text-blueGray-700' : 'text-white']"
-          >
-            Gestión de Pedido
+          <h3 class="font-semibold text-lg text-blueGray-700">
+            Gestión de Pedidos
           </h3>
         </div>
         <div class="relative w-full px-4 max-w-full flex-grow flex-1 text-right">
-           <input
+          <input
             type="text"
             v-model="searchTerm"
-            @input="filterEmployeesLocal"
-            placeholder="Buscar por nombre o correo..."
+            @input="filterPedidosLocal"
+            placeholder="Buscar por cliente o descripción..."
             class="px-3 py-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded border border-blueGray-300 text-sm focus:outline-none focus:ring"
           />
           <button
@@ -32,314 +26,285 @@
     </div>
 
     <div class="block w-full overflow-x-auto">
-      <div v-if="isLoading" class="text-center py-4 text-blueGray-600">Cargando empleados...</div>
+      <div v-if="isLoading" class="text-center py-4 text-blueGray-600">Cargando pedidos...</div>
       <div v-if="error" class="text-center py-4 text-red-500">Error: {{ error }}</div>
 
       <table v-if="!isLoading && !error" class="w-full bg-transparent border-collapse">
-  <thead class="thead-light">
-    <tr>
-      <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">ID Pedido</th>
-      <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Nombre del CLiente</th>
-      <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Telefono</th>
-      <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Descripcion</th>
-      <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Fecha de Solicitud</th>
-      <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Fecha de entrega</th>
-      <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Enviarse a</th>
-      <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Estado</th>
-      <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Acciones</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr v-if="paginatedEmployees.length === 0 && !isLoading">
-      <td colspan="9" class="text-center py-4 text-blueGray-500">No hay empleados que coincidan con la búsqueda.</td>
-    </tr>
-    <tr v-for="emp in paginatedEmployees" :key="emp.id_Empleado">
-      <td class="px-6 py-4 text-sm whitespace-nowrap">{{ emp.id_Empleado }}</td>
-      <td class="px-6 py-4 text-sm whitespace-nowrap">{{ emp.id_Usuario || 'N/A' }}</td>
-      <td class="px-6 py-4 text-sm whitespace-nowrap">
-        {{ emp.primerNombre }} {{ emp.segundoNombre || '' }} {{ emp.primerApellido }} {{ emp.segundoApellido || '' }}
-      </td>
-      <td class="px-6 py-4 text-sm whitespace-nowrap">
-        {{ emp.sexo === 'M' ? 'Masculino' : emp.sexo === 'F' ? 'Femenino' : 'No definido' }}
-      </td>
-      <td class="px-6 py-4 text-sm whitespace-nowrap">{{ emp.correo || 'No definido' }}</td>
-      <td class="px-6 py-4 text-sm whitespace-nowrap">{{ emp.telefono || 'No definido' }}</td>
-      <td class="px-6 py-4 text-sm whitespace-nowrap">
-        {{ emp.fechaDeNac ? new Date(emp.fechaDeNac).toLocaleDateString() : 'No definido' }}
-      </td>
-      <td class="px-6 py-4 text-sm whitespace-nowrap">{{ emp.rol || 'No definido' }}</td>
-      <td class="px-6 py-4 text-sm text-right whitespace-nowrap">
-        <button
-          class="bg-blueGray-500 text-white px-3 py-1 text-xs rounded hover:shadow-md"
-          @click="openEditModal(emp)"
-        >
-          Editar
-        </button>
-        <button
-          class="bg-red-500 text-white px-3 py-1 text-xs ml-1 rounded hover:shadow-md"
-          @click="confirmDelete(emp.id_Empleado)"
-        >
-          Eliminar
-        </button>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
+        <thead class="thead-light">
+          <tr>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">ID</th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">Cliente</th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">Teléfono</th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">Descripción</th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">Solicitud</th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">Entrega</th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">Dirección</th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">Estado</th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left bg-blueGray-50 text-blueGray-500 border-blueGray-100">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="paginatedPedidos.length === 0 && !isLoading">
+            <td colspan="9" class="text-center py-4 text-blueGray-500">No hay pedidos registrados</td>
+          </tr>
+          <tr v-for="pedido in paginatedPedidos" :key="pedido.id_Pedido">
+            <td class="px-6 py-4 text-sm whitespace-nowrap">{{ pedido.id_Pedido }}</td>
+            <td class="px-6 py-4 text-sm whitespace-nowrap">{{ pedido.nombre_Cliente || 'N/A' }}</td>
+            <td class="px-6 py-4 text-sm whitespace-nowrap">{{ pedido.telefono || 'N/A' }}</td>
+            <td class="px-6 py-4 text-sm whitespace-nowrap">{{ pedido.descripcion || 'N/A' }}</td>
+            <td class="px-6 py-4 text-sm whitespace-nowrap">{{ formatDate(pedido.fecha_Solicitud) }}</td>
+            <td class="px-6 py-4 text-sm whitespace-nowrap">{{ formatDate(pedido.fecha_Entrega) }}</td>
+            <td class="px-6 py-4 text-sm whitespace-nowrap">{{ pedido.enviarseA || 'N/A' }}</td>
+            <td class="px-6 py-4 text-sm whitespace-nowrap">
+              <span :class="getEstadoClass(pedido.estado)">{{ pedido.estado || 'pendiente' }}</span>
+            </td>
+            <td class="px-6 py-4 text-sm text-right whitespace-nowrap">
+                            <button
+                class="bg-red-500 text-white px-3 py-1 text-xs ml-1 rounded hover:shadow-md"
+                @click="confirmDelete(pedido.id_Pedido)"
+              >
+                Eliminar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <div class="rounded-b mt-0 px-4 py-3 border-0" v-if="!isLoading && !error && filteredEmployees.length > 0">
-        <div class="flex flex-wrap items-center justify-between">
-            <div class="text-xs text-blueGray-500">
-                Mostrando {{ paginatedEmployees.length }} de {{ filteredEmployees.length }} registros. Página {{ currentPage }} de {{ totalPages }}
-            </div>
-            <div class="flex">
-                <button
-                    @click="prevPage"
-                    :disabled="currentPage === 1"
-                    class="bg-blueGray-200 text-blueGray-700 px-3 py-1 text-xs rounded-l hover:bg-blueGray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    Anterior
-                </button>
-                <button
-                    @click="nextPage"
-                    :disabled="currentPage === totalPages"
-                    class="bg-blueGray-200 text-blueGray-700 px-3 py-1 text-xs rounded-r border-l border-blueGray-300 hover:bg-blueGray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                    Siguiente
-                </button>
-            </div>
+    <!-- Paginación -->
+    <div class="rounded-b mt-0 px-4 py-3 border-0" v-if="!isLoading && !error && filteredPedidos.length > 0">
+      <div class="flex flex-wrap items-center justify-between">
+        <div class="text-xs text-blueGray-500">
+          Mostrando {{ paginatedPedidos.length }} de {{ filteredPedidos.length }} registros
         </div>
+        <div class="flex">
+          <button
+            @click="prevPage"
+            :disabled="currentPage === 1"
+            class="bg-blueGray-200 text-blueGray-700 px-3 py-1 text-xs rounded-l hover:bg-blueGray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Anterior
+          </button>
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            class="bg-blueGray-200 text-blueGray-700 px-3 py-1 text-xs rounded-r border-l border-blueGray-300 hover:bg-blueGray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
     </div>
-    <div v-if="showModal" class="fixed inset-0 bg-black opacity-25 z-40"></div>
 
+    <!-- Modal para agregar/editar -->
+    <div v-if="showModal" class="fixed inset-0 bg-black opacity-25 z-40"></div>
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="relative w-auto max-w-3xl mx-auto">
         <div class="bg-white rounded-lg shadow-lg">
           <div class="flex items-start justify-between p-5 border-b">
             <h3 class="text-3xl font-semibold">
-              {{ isEditing ? 'Editar Empleado' : 'Agregar Nuevo Empleado' }}
+              {{ isEditing ? 'Editar Pedido' : 'Nuevo Pedido' }}
             </h3>
             <button @click="closeModal" class="text-3xl leading-none">&times;</button>
           </div>
           <div class="p-6">
-            <form @submit.prevent="submitEmployeeForm">
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-    <input
-      v-model="currentEmployee.primerNombre"
-      placeholder="Primer Nombre *"
-      required
-      class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
-    />
-    <input
-      v-model="currentEmployee.segundoNombre"
-      placeholder="Segundo Nombre"
-      class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
-    />
-  </div>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-    <input
-      v-model="currentEmployee.primerApellido"
-      placeholder="Primer Apellido *"
-      required
-      class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
-    />
-    <input
-      v-model="currentEmployee.segundoApellido"
-      placeholder="Segundo Apellido"
-      class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
-    />
-    <input
-  v-model="currentEmployee.id_Usuario"
-  type="number"
-  placeholder="ID Usuario *"
+            <form @submit.prevent="submitPedidoForm">
+              <div class="mb-4">
+  <label class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
+
+  <template v-if="!isEditing">
+<select
+  v-model.number="currentPedido.id_Cliente"
   required
   class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
-  :disabled="isEditing"
-/>
-<p v-if="submitted && !currentEmployee.id_Usuario && !isEditing" class="text-red-500 text-xs mt-1">
-  El ID de usuario es requerido
-</p>
-  
-  </div>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-    <select
-      v-model="currentEmployee.sexo"
-      class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
-    >
-      <option value="">Sexo</option>
-      <option value="M">Masculino</option>
-      <option value="F">Femenino</option>
-    </select>
-    <input
-      v-model="currentEmployee.correo"
-      type="email"
-      placeholder="Correo *"
-      required
-      class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
-    />
-  </div>
+>
+  <option :value="''" disabled>Seleccione un cliente</option>
+  <option
+    v-for="cliente in clientes"
+    :key="cliente.id_Cliente"
+    :value="cliente.id_Cliente"
+  >
+    {{ cliente.Nombre_Cliente }} - {{ cliente.Telefono }}
+  </option>
+</select>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-    <input
-      v-model="currentEmployee.telefono"
-      type="tel"
-      placeholder="Teléfono"
-      class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
-    />
-    <input
-      v-model="currentEmployee.fechaDeNac"
-      type="date"
-      class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
-    />
-  </div>
 
-  <div class="flex justify-end pt-4 border-t">
-    <button
-      type="button"
-      @click="closeModal"
-      class="mr-2 text-red-500 uppercase font-bold text-sm px-6 py-3 rounded"
-    >
-      Cancelar
-    </button>
-    <button
-      type="submit"
-      :disabled="isSaving"
-      class="bg-emerald-500 text-white px-6 py-3 rounded uppercase font-bold text-sm"
-    >
-      {{ isSaving ? 'Procesando...' : (isEditing ? 'Guardar Cambios' : 'Agregar') }}
-    </button>
-  </div>
-</form>
+  </template>
 
+  <template v-else>
+    <div class="py-2 text-blueGray-700">
+      <div><strong>Cliente:</strong> {{ clientes.find(c => c.id_Cliente === currentPedido.id_Cliente)?.Nombre_Cliente || 'N/A' }}</div>
+      <div><strong>Teléfono:</strong> {{ clientes.find(c => c.id_Cliente === currentPedido.id_Cliente)?.Telefono || 'N/A' }}</div>
+    </div>
+  </template>
+</div>
+
+
+
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Descripción *</label>
+                <textarea
+                  v-model="currentPedido.descripcion"
+                  placeholder="Descripción del pedido"
+                  required
+                  class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Solicitud *</label>
+                  <input
+                    v-model="currentPedido.fecha_Solicitud"
+                    type="date"
+                    required
+                    class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Entrega *</label>
+                  <input
+                    v-model="currentPedido.fecha_Entrega"
+                    type="date"
+                    required
+                    class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
+                  />
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Dirección de envío</label>
+                <input
+                  v-model="currentPedido.enviarseA"
+                  placeholder="Dirección para entrega"
+                  class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
+                />
+              </div>
+
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
+                <select
+                  v-model="currentPedido.estado"
+                  required
+                  class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
+                >
+                  <option value="pendiente">Pendiente</option>
+                  <option value="en_proceso">En proceso</option>
+                  <option value="completado">Completado</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+              </div>
+
+              <div class="flex justify-end pt-4 border-t">
+                <button
+                  type="button"
+                  @click="closeModal"
+                  class="mr-2 text-red-500 uppercase font-bold text-sm px-6 py-3 rounded"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  :disabled="isSaving"
+                  class="bg-emerald-500 text-white px-6 py-3 rounded uppercase font-bold text-sm"
+                >
+                  {{ isSaving ? 'Guardando...' : 'Guardar' }}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </template>
+
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
-import { useEmpleadosStore } from '../../store/empleado.js';
+import { usePedidosStore } from '../../store/pedido.js';
+import { useClientesStore } from '../../store/cliente.js';
 
-const props = defineProps({
-  color: { type: String, default: 'light' }
-});
+const pedidosStore = usePedidosStore();
+const clientesStore = useClientesStore();
 
-const store = useEmpleadosStore();
+const pedidos = computed(() => pedidosStore.pedidos);
+const clientes = computed(() => clientesStore.clientes);
+const isLoading = computed(() => pedidosStore.isLoading);
+const isSaving = computed(() => pedidosStore.isSaving);
+const error = computed(() => pedidosStore.error);
 
-const employees = computed(() => store.employees);
-const isLoading = computed(() => store.isLoading);
-const isSaving = computed(() => store.isSaving);
-const error = computed(() => store.error);
-
+// Búsqueda y paginación
 const searchTerm = ref('');
-const filteredEmployees = ref([]);
-
+const filteredPedidos = ref([]);
 const currentPage = ref(1);
-const itemsPerPage = ref(8);
+const itemsPerPage = ref(10);
 
+// Modal
 const showModal = ref(false);
 const isEditing = ref(false);
-const currentEmployee = ref({
-  id_Empleado: null,
-  id_Usuario: null,  // importante que esté aquí
-  primerNombre: '',
-  segundoNombre: '',
-  primerApellido: '',
-  segundoApellido: '',
-  sexo: '',
-  correo: '',
-  userName: '',
-  contrasena: '',
-  telefono: '',
-  fechaDeNac: '',
-  rol: ''
+const currentPedido = ref({
+  id_Pedido: null,
+  id_Cliente:  '',
+  descripcion: '',
+  fecha_Solicitud: '',
+  fecha_Entrega: '',
+  enviarseA: '',
+  estado: 'pendiente'
 });
 
+// Cargar datos iniciales
 onMounted(async () => {
-  await store.fetchAllEmpleados();
-  filterEmployeesLocal();
+  await pedidosStore.fetchAllPedidos();
+  await clientesStore.fetchAllClientes();
+  filterPedidosLocal();
 });
 
-watch([employees, searchTerm], () => {
-  filterEmployeesLocal();
-});
-
-const totalPages = computed(() => {
-  if (filteredEmployees.value.length === 0) return 1;
-  return Math.ceil(filteredEmployees.value.length / itemsPerPage.value);
-});
-
-const paginatedEmployees = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return filteredEmployees.value.slice(start, end);
-});
-
-function filterEmployeesLocal() {
+// Filtrar pedidos
+function filterPedidosLocal() {
   const term = searchTerm.value.toLowerCase();
-  if (!term) {
-    filteredEmployees.value = [...employees.value];
-  } else {
-    filteredEmployees.value = employees.value.filter(emp =>
-      (emp.primerNombre?.toLowerCase().includes(term)) ||
-      (emp.primerApellido?.toLowerCase().includes(term)) ||
-      (emp.correo?.toLowerCase().includes(term))
-    );
-  }
+  filteredPedidos.value = pedidos.value.filter(pedido => 
+    (pedido.nombre_Cliente?.toLowerCase().includes(term) ||
+    (pedido.descripcion?.toLowerCase().includes(term))
+  ))
   currentPage.value = 1;
 }
 
-function nextPage() {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-}
+// Paginación
+const totalPages = computed(() => Math.ceil(filteredPedidos.value.length / itemsPerPage.value));
+const paginatedPedidos = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  return filteredPedidos.value.slice(start, start + itemsPerPage.value);
+});
 
-function prevPage() {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-}
+function nextPage() { if (currentPage.value < totalPages.value) currentPage.value++; }
+function prevPage() { if (currentPage.value > 1) currentPage.value--; }
 
+// Modal functions
 function openAddModal() {
   isEditing.value = false;
-  currentEmployee.value = {
-    id_Empleado: null,
-    id_Usuario: null,  // importante limpiar aquí también
-    primerNombre: '',
-    segundoNombre: '',
-    primerApellido: '',
-    segundoApellido: '',
-    sexo: '',
-    correo: '',
-    userName: '',
-    contrasena: '',
-    telefono: '',
-    fechaDeNac: '',
-    rol: ''
+  currentPedido.value = {
+    id_Pedido: null,
+    id_Cliente: null,
+    descripcion: '',
+    fecha_Solicitud: new Date().toISOString().split('T')[0],
+    fecha_Entrega: '',
+    enviarseA: '',
+    estado: 'pendiente'
   };
   showModal.value = true;
 }
 
-function openEditModal(emp) {
+function openEditModal(pedido) {
   isEditing.value = true;
-  currentEmployee.value = {
-    id_Empleado: emp.id_Empleado,
-    id_Usuario: emp.id_Usuario || null, // Mantener el id_Usuario existente
-    primerNombre: emp.primerNombre || '',
-    segundoNombre: emp.segundoNombre || '',
-    primerApellido: emp.primerApellido || '',
-    segundoApellido: emp.segundoApellido || '',
-    sexo: emp.sexo || '',
-    correo: emp.correo || '',
-    userName: emp.userName || '',
-    contrasena: '', // La contraseña se deja en blanco a propósito
-    telefono: emp.telefono || '',
-    fechaDeNac: emp.fechaDeNac ? emp.fechaDeNac.split('T')[0] : '',
-    rol: emp.rol || ''
+  currentPedido.value = {
+    id_Pedido: pedido.id_Pedido,
+    id_Cliente: pedido.id_Cliente,
+    descripcion: pedido.descripcion,
+    fecha_Solicitud: pedido.fecha_Solicitud.split('T')[0],
+    fecha_Entrega: pedido.fecha_Entrega.split('T')[0],
+    enviarseA: pedido.enviarseA,
+    estado: pedido.estado
   };
   showModal.value = true;
 }
@@ -347,65 +312,76 @@ function openEditModal(emp) {
 function closeModal() {
   showModal.value = false;
 }
+function getClienteSeleccionado() {
+  return clientes.value.find(c => c.id_Cliente === currentPedido.value.id_Cliente);
+}
 
-async function submitEmployeeForm() {
-  
 
-    // Validación básica para modo edición
-    if (isEditing.value && !currentEmployee.value.id_Empleado) {
-        console.error('ID de empleado no definido para actualización');
-        return;
+async function submitPedidoForm() {
+  try {
+    const cliente = getClienteSeleccionado();
+    if (!cliente) {
+      alert('Debe seleccionar un cliente válido');
+      return;
     }
 
-    // Validación para creación (ID Usuario requerido)
-    if (!isEditing.value && !currentEmployee.value.id_Usuario) {
-        console.error('ID de usuario es requerido para nuevo empleado');
-        return;
+ const pedidoData = {
+  id_Cliente: currentPedido.value.id_Cliente,
+  nombre_Cliente: cliente.Nombre_Cliente,
+  telefono: cliente.Telefono,
+  descripcion: currentPedido.value.descripcion,
+  fecha_Solicitud: currentPedido.value.fecha_Solicitud,
+  fecha_Entrega: currentPedido.value.fecha_Entrega,
+  enviarseA: currentPedido.value.enviarseA,
+  estado: currentPedido.value.estado
+};
+
+
+
+    if (isEditing.value) {
+      await pedidosStore.updatePedido(currentPedido.value.id_Pedido, pedidoData);
+    } else {
+      await pedidosStore.addPedido(pedidoData);
     }
 
-    const dataToSend = {
-        id_Usuario: currentEmployee.value.id_Usuario, // Incluir el ID de usuario
-        primerNombre: currentEmployee.value.primerNombre,
-        segundoNombre: currentEmployee.value.segundoNombre || null,
-        primerApellido: currentEmployee.value.primerApellido,
-        segundoApellido: currentEmployee.value.segundoApellido || null,
-        sexo: currentEmployee.value.sexo || null,
-        correo: currentEmployee.value.correo,
-        userName: currentEmployee.value.userName,
-        telefono: currentEmployee.value.telefono || null,
-        fechaDeNac: currentEmployee.value.fechaDeNac ? new Date(currentEmployee.value.fechaDeNac).toISOString() : null,
-        rol: currentEmployee.value.rol,
-    };
+    await pedidosStore.fetchAllPedidos();
+    filterPedidosLocal();
+    closeModal();
+  } catch (err) {
+    console.error('Error al guardar pedido:', err);
+  }
+}
+// Helpers
+function formatDate(dateString) {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
+}
 
-    if (!isEditing.value || currentEmployee.value.contrasena) {
-        dataToSend.contrasena = currentEmployee.value.contrasena;
-    }
+function getEstadoClass(estado) {
+  const classes = {
+    pendiente: 'bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs',
+    en_proceso: 'bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs',
+    completado: 'bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs',
+    cancelado: 'bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs'
+  };
+  return classes[estado] || classes.pendiente;
+}
 
-    try {
-        if (isEditing.value) {
-            await store.updateEmpleado(currentEmployee.value.id_Empleado, dataToSend);
-        } else {
-            await store.addEmpleado(dataToSend);
-        }
-        
-        await store.fetchAllEmpleados();
-        filterEmployeesLocal();
-        closeModal();
-    } catch (err) {
-        console.error("Error en submitEmployeeForm:", err);
-        // Puedes mostrar el error al usuario aquí
-    }
-}function confirmDelete(id) {
-  if (confirm('¿Seguro que deseas eliminar este empleado?')) {
-    store.deleteEmpleado(id).then(async () => {
-      await store.fetchAllEmpleados();
-      filterEmployeesLocal();
+// Confirmar eliminación
+function confirmDelete(id) {
+  if (confirm('¿Seguro que deseas eliminar este pedido?')) {
+    pedidosStore.deletePedido(id).then(() => {
+      pedidosStore.fetchAllPedidos();
+      filterPedidosLocal();
     });
   }
 }
+
+// Watch for changes
+watch([pedidos, searchTerm], filterPedidosLocal);
 </script>
 
-
 <style scoped>
-/* Ajustes si quieres */
+/* Estilos personalizados si son necesarios */
 </style>
