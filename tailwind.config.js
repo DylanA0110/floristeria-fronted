@@ -1,56 +1,71 @@
 // tailwind.config.js
 const plugin = require("tailwindcss/plugin");
-const colors = require("tailwindcss/colors");
+const colors = require("tailwindcss/colors"); // Importamos los colores base de Tailwind
 
 module.exports = {
-  purge: {
-    enabled: true,
-    content: [
-      "./**/*.html",
-      "./*.html",
-      "./**/*.js",
-      "./*.js",
-      "./**/*.vue",
-      "./*.vue",
-    ],
-    options: {
-      safelist: [],
-    },
-  },
+  // CAMBIO 1: Renombrar 'purge' a 'content'
+  // El objeto 'enabled: true' ya no es necesario aquí.
+  content: [
+    // CAMBIO 2: Patrones más específicos para evitar escanear node_modules
+    // "./**/*.html",   // Si tienes HTML directamente en la raíz o subcarpetas, este es muy amplio
+    // "./*.html",      // Si tienes index.html en la raíz
+    // "./**/*.js",     // ESTO ES LO QUE CAUSA EL PROBLEMA DE node_modules
+    // "./*.js",        // Y esto también
+    // "./**/*.vue",    // Este es bueno para Vue
+    // "./*.vue",       // Este también es bueno para Vue
+    
+    // PATRONES RECOMENDADOS para proyectos Vue con Vite:
+    "./index.html", // Tu archivo HTML principal
+    "./src/**/*.{vue,js,ts,jsx,tsx}", // Todos los archivos .vue, .js, .ts, .jsx, .tsx dentro de src/
+    // Si tienes archivos de Tailwind CSS personalizados en otras carpetas (ej: assets/css), inclúyelos:
+    // "./src/assets/css/*.css", 
+  ],
+  // La opción 'options' con 'safelist' va directamente dentro de 'content' si la necesitas
+  // content: {
+  //   files: [
+  //     './index.html',
+  //     './src/**/*.{vue,js,ts,jsx,tsx}',
+  //   ],
+  //   extract: {
+  //     // Puedes definir un extractor personalizado si lo necesitas
+  //   },
+  //   transform: {
+  //     // Puedes definir transformaciones personalizadas
+  //   },
+  //   safelist: [], // Mueve safelist aquí si necesitas
+  // },
+
   theme: {
-    // Es importante no sobrescribir 'colors' directamente aquí si queremos mantener los colores predeterminados de Tailwind
-    // Si necesitas mantener los colores como 'blueGray', 'red', 'emerald', etc., asegúrate de extenderlos en 'extend'.
-    // Tu configuración actual con `...colors` ya los incluye.
-    // Lo más seguro es usar 'extend' para agregar tus colores personalizados.
+    // Al usar 'extend', tus colores personalizados se fusionan con los colores predeterminados de Tailwind.
+    // Esto es lo correcto para mantener los colores base de Tailwind (blueGray, red, emerald, etc.)
+    // Y añadir tus propios colores de 'floristeria'.
     extend: {
       colors: {
-        // Aquí defines tus colores personalizados para la floristería
+        // Incluye todos los colores por defecto de Tailwind si los necesitas junto a los tuyos
+        // Esto sobrescribe los colores base de Tailwind. Si quieres mantener TODOS los de Tailwind
+        // y *solo* añadir los tuyos, el 'colors' debería estar así:
+        ...colors, // Esto importa todos los colores por defecto de Tailwind
+        // Y luego defines tus colores personalizados
         floristeria: {
-          // Puedes darles nombres descriptivos o números si prefieres
-          // Por ejemplo, 'darkGreen', 'mediumGreen', 'gold', 'orangePrimary', 'orangeAccent'
-          darkGreen: '#12403B',    // Un verde muy oscuro
-          mediumGreen: '#31594E',  // Un verde intermedio
-          gold: '#A67D32',         // Un dorado/marrón claro
-          orangePrimary: '#F2921D',// Un naranja vibrante
-          orangeAccent: '#F2811D', // Un naranja un poco más intenso/rojizo
+          darkGreen: '#12403B',
+          mediumGreen: '#31594E',
+          gold: '#A67D32',
+          orangePrimary: '#F2921D',
+          orangeAccent: '#F2811D',
         },
-        // Mantenemos los colores existentes de Tailwind si los usas en alguna parte,
-        // o si los sobrescribes aquí, se usarán tus nuevas definiciones.
-        // Por ejemplo, si quieres que tu 'emerald' o 'blueGray' default sea de tu paleta:
-        // emerald: {
-        //   600: '#12403B', // Si quieres que tu bg-emerald-600 ahora sea el darkGreen de tu floristería
-        //   // ... puedes definir otros tonos de emerald aquí si los vas a usar
-        // },
+        // Si necesitas modificar un color existente de Tailwind o añadir un tono específico:
         // blueGray: {
-        //   200: '#F3F4F6', // Un gris azulado claro, para fondos de footer, etc.
-        //   // ...
+        //   '50': colors.blueGray['50'], // Para mantener un tono específico de blueGray si lo necesitas
+        //   '200': '#F3F4F6', // Ejemplo de sobrescribir un tono específico
         // },
+        // Puedes referenciar los colores de Tailwind así:
+        // blueGray: colors.blueGray,
       },
       minHeight: {
         "screen-75": "75vh",
       },
       fontSize: {
-        "55": "55rem",
+        // "55": "55rem", // Cuidado con tamaños de fuente tan grandes, pueden causar overflow
       },
       opacity: {
         "80": ".8",
@@ -104,26 +119,21 @@ module.exports = {
       },
     },
   },
-  variants: [
-    "responsive",
-    "group-hover",
-    "focus-within",
-    "first",
-    "last",
-    "odd",
-    "even",
-    "hover",
-    "focus",
-    "active",
-    "visited",
-    "disabled",
-  ],
+  // La propiedad 'variants' ha sido deprecada en Tailwind CSS v3+.
+  // Ahora se controlan a través de la configuración de 'plugins' y 'theme'.
+  // Elimina esta sección por completo.
+  // variants: [
+  //   "responsive", "group-hover", "focus-within", "first", "last", "odd", "even",
+  //   "hover", "focus", "active", "visited", "disabled",
+  // ],
   plugins: [
     require("@tailwindcss/forms"),
     plugin(function ({ addComponents, theme }) {
       const screens = theme("screens", {});
       addComponents([
         {
+          // Esto ya lo provee Tailwind por defecto, a menos que necesites un comportamiento diferente.
+          // Si lo dejas, sobrescribe el 'container' predeterminado de Tailwind.
           ".container": { width: "100%" },
         },
         {
@@ -155,9 +165,11 @@ module.exports = {
           },
         },
         {
+          // Asegúrate de que esto sea lo que quieres. Normalmente, '2xl' es más grande que 'xl'.
+          // Aquí tienes el mismo max-width que 'xl'.
           [`@media (min-width: ${screens["2xl"]})`]: {
             ".container": {
-              "max-width": "1280px",
+              "max-width": "1280px", 
             },
           },
         },
