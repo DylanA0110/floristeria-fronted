@@ -45,7 +45,8 @@
       <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Correo</th>
       <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Teléfono</th>
       <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Fecha de Nacimiento</th>
-      
+      <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Rol</th>
+      <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Acciones</th>
     </tr>
   </thead>
   <tbody>
@@ -66,7 +67,7 @@
       <td class="px-6 py-4 text-sm whitespace-nowrap">
         {{ emp.fechaDeNac ? new Date(emp.fechaDeNac).toLocaleDateString() : 'No definido' }}
       </td>
-      
+      <td class="px-6 py-4 text-sm whitespace-nowrap">{{ emp.rol || 'No definido' }}</td>
       <td class="px-6 py-4 text-sm text-right whitespace-nowrap">
         <button
           class="bg-blueGray-500 text-white px-3 py-1 text-xs rounded hover:shadow-md"
@@ -148,6 +149,18 @@
       placeholder="Segundo Apellido"
       class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
     />
+    <input
+  v-model="currentEmployee.id_Usuario"
+  type="number"
+  placeholder="ID Usuario *"
+  required
+  class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
+  :disabled="isEditing"
+/>
+<p v-if="submitted && !currentEmployee.id_Usuario && !isEditing" class="text-red-500 text-xs mt-1">
+  El ID de usuario es requerido
+</p>
+  
   </div>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
     <select
@@ -229,11 +242,9 @@ const itemsPerPage = ref(8);
 
 const showModal = ref(false);
 const isEditing = ref(false);
-
-// Objeto de empleado inicial, con todos sus campos
-const getInitialEmployee = () => ({
+const currentEmployee = ref({
   id_Empleado: null,
-  id_Usuario: null,
+  id_Usuario: null,  // importante que esté aquí
   primerNombre: '',
   segundoNombre: '',
   primerApellido: '',
@@ -246,8 +257,6 @@ const getInitialEmployee = () => ({
   fechaDeNac: '',
   rol: ''
 });
-
-const currentEmployee = ref(getInitialEmployee());
 
 onMounted(async () => {
   await store.fetchAllEmpleados();
@@ -297,27 +306,40 @@ function prevPage() {
 
 function openAddModal() {
   isEditing.value = false;
-  currentEmployee.value = getInitialEmployee(); // Usamos la función para resetear
+  currentEmployee.value = {
+    id_Empleado: null,
+    id_Usuario: null,  // importante limpiar aquí también
+    primerNombre: '',
+    segundoNombre: '',
+    primerApellido: '',
+    segundoApellido: '',
+    sexo: '',
+    correo: '',
+    userName: '',
+    contrasena: '',
+    telefono: '',
+    fechaDeNac: '',
+    rol: ''
+  };
   showModal.value = true;
 }
 
-// CORRECCIÓN AQUÍ: Asegúrate de copiar TODOS los campos necesarios
 function openEditModal(emp) {
   isEditing.value = true;
   currentEmployee.value = {
     id_Empleado: emp.id_Empleado,
-    id_Usuario: emp.id_Usuario, // Campo que faltaba
+    id_Usuario: emp.id_Usuario || null, // Mantener el id_Usuario existente
     primerNombre: emp.primerNombre || '',
     segundoNombre: emp.segundoNombre || '',
     primerApellido: emp.primerApellido || '',
     segundoApellido: emp.segundoApellido || '',
     sexo: emp.sexo || '',
     correo: emp.correo || '',
-    userName: emp.userName || '', // Campo que faltaba
+    userName: emp.userName || '',
     contrasena: '', // La contraseña se deja en blanco a propósito
     telefono: emp.telefono || '',
     fechaDeNac: emp.fechaDeNac ? emp.fechaDeNac.split('T')[0] : '',
-    rol: emp.rol || '' // Campo que faltaba
+    rol: emp.rol || ''
   };
   showModal.value = true;
 }
@@ -327,10 +349,22 @@ function closeModal() {
 }
 
 async function submitEmployeeForm() {
-    // No necesitamos id_Usuario aquí, ya que el backend debería manejar la lógica
-    // de crear/actualizar el usuario asociado al empleado.
-    // Solo enviamos los datos que el usuario puede cambiar.
+  
+
+    // Validación básica para modo edición
+    if (isEditing.value && !currentEmployee.value.id_Empleado) {
+        console.error('ID de empleado no definido para actualización');
+        return;
+    }
+
+    // Validación para creación (ID Usuario requerido)
+    if (!isEditing.value && !currentEmployee.value.id_Usuario) {
+        console.error('ID de usuario es requerido para nuevo empleado');
+        return;
+    }
+
     const dataToSend = {
+        id_Usuario: currentEmployee.value.id_Usuario, // Incluir el ID de usuario
         primerNombre: currentEmployee.value.primerNombre,
         segundoNombre: currentEmployee.value.segundoNombre || null,
         primerApellido: currentEmployee.value.primerApellido,
@@ -343,32 +377,25 @@ async function submitEmployeeForm() {
         rol: currentEmployee.value.rol,
     };
 
-    // Solo añade la contraseña al payload si no estamos editando O si se escribió una nueva
-    if (!isEditing.value || (isEditing.value && currentEmployee.value.contrasena)) {
+    if (!isEditing.value || currentEmployee.value.contrasena) {
         dataToSend.contrasena = currentEmployee.value.contrasena;
     }
 
     try {
-        let ok;
         if (isEditing.value) {
-            // CORRECCIÓN PRINCIPAL: Pasa el ID como primer argumento
-            ok = await store.updateEmpleado(currentEmployee.value.id_Empleado, dataToSend);
+            await store.updateEmpleado(currentEmployee.value.id_Empleado, dataToSend);
         } else {
-            // Para agregar, pasamos el objeto completo
-            ok = await store.addEmpleado(dataToSend);
+            await store.addEmpleado(dataToSend);
         }
-
-        if (ok) {
-            await store.fetchAllEmpleados();
-            filterEmployeesLocal();
-            closeModal();
-        }
+        
+        await store.fetchAllEmpleados();
+        filterEmployeesLocal();
+        closeModal();
     } catch (err) {
-        console.error("Error al enviar formulario de empleado:", err);
+        console.error("Error en submitEmployeeForm:", err);
+        // Puedes mostrar el error al usuario aquí
     }
-}
-
-function confirmDelete(id) {
+}function confirmDelete(id) {
   if (confirm('¿Seguro que deseas eliminar este empleado?')) {
     store.deleteEmpleado(id).then(async () => {
       await store.fetchAllEmpleados();
@@ -377,6 +404,8 @@ function confirmDelete(id) {
   }
 }
 </script>
+
+
 <style scoped>
 /* Ajustes si quieres */
 </style>

@@ -47,29 +47,35 @@ export const useEmpleadosStore = defineStore('empleados', {
       }
     },
 
-    /**
-     * Actualiza un empleado existente.
-     * @param {Object} empleadoData Los datos actualizados del empleado (debe incluir Id_Empleado).
-     */
-    async updateEmpleado(empleadoData) {
+    async updateEmpleado(id, empleadoData) {
       this.isSaving = true;
       this.error = null;
+      
+      if (!id) {
+        this.error = 'ID de empleado no proporcionado';
+        this.isSaving = false;
+        return false;
+      }
+
       try {
-        await empleadoService.updateEmpleado(empleadoData.Id_Empleado, empleadoData);
+        await empleadoService.updateEmpleado(id, empleadoData);
+        
         // Actualiza el empleado en el estado local
-        const index = this.employees.findIndex(emp => emp.Id_Empleado === empleadoData.Id_Empleado);
+        const index = this.employees.findIndex(emp => emp.id_Empleado === id);
         if (index !== -1) {
-          // Fusionar solo los campos actualizados. Asegúrate de que el backend devuelve el objeto completo si es necesario
-          // O actualiza solo los campos que sabes que se modificaron.
-          // Para simplificar, si la API no devuelve el objeto completo, es mejor hacer un fetchAllEmpleados() después de la actualización exitosa
-          // O actualizar manualmente los campos en el objeto existente.
-          Object.assign(this.employees[index], empleadoData);
+          // Mantenemos el ID original y solo actualizamos los demás campos
+          this.employees[index] = { 
+            ...this.employees[index],
+            ...empleadoData,
+            id_Empleado: id // Aseguramos que el ID no se modifique
+          };
         }
-        return true; // Indica éxito
+        
+        return true;
       } catch (error) {
         this.error = 'No se pudo actualizar el empleado. ' + (error.response?.data?.message || error.message || 'Error desconocido.');
         console.error('Error en updateEmpleado:', error);
-        return false; // Indica fallo
+        return false;
       } finally {
         this.isSaving = false;
       }

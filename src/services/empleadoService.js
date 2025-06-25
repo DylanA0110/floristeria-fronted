@@ -1,80 +1,113 @@
 // src/services/empleadoService.js
-import api from './api'; // Asegúrate de que la ruta a tu api.js sea correcta
+import api from './api';
 
-const BASE_URL = '/Empleado'; // La ruta base de tu controlador C# es 'api/[controller]', por lo que es '/Empleado'
+const BASE_URL = '/Empleado';
 
 export const empleadoService = {
   /**
    * Obtiene todos los empleados.
-   * @returns {Promise<Array>} Una promesa que resuelve con la lista de empleados.
+   * @returns {Promise<Array>} Lista de empleados
+   * @throws {Error} Si falla la petición
    */
   async getAllEmpleados() {
     try {
       const response = await api.get(BASE_URL);
-      return response.data;
+      return response.data || [];
     } catch (error) {
-      console.error('Error al obtener todos los empleados:', error);
-      throw error; // Propaga el error para que el store lo maneje
+      const errorMsg = 'Error al obtener empleados';
+      console.error(errorMsg, error);
+      throw new Error(`${errorMsg}: ${error.message}`);
     }
   },
 
   /**
    * Obtiene un empleado por su ID.
-   * @param {number} id El ID del empleado.
-   * @returns {Promise<Object>} Una promesa que resuelve con el empleado.
+   * @param {number} id - ID del empleado
+   * @returns {Promise<Object>} Datos del empleado
+   * @throws {Error} Si el ID no es válido o falla la petición
    */
   async getEmpleadoById(id) {
+    if (!id || isNaN(id)) {
+      throw new Error('ID de empleado no válido');
+    }
+
     try {
       const response = await api.get(`${BASE_URL}/${id}`);
+      if (!response.data) {
+        throw new Error('Empleado no encontrado');
+      }
       return response.data;
     } catch (error) {
-      console.error(`Error al obtener empleado con ID ${id}:`, error);
-      throw error;
+      const errorMsg = `Error al obtener empleado con ID ${id}`;
+      console.error(errorMsg, error);
+      throw new Error(`${errorMsg}: ${error.response?.data?.message || error.message}`);
     }
   },
 
   /**
    * Crea un nuevo empleado.
-   * @param {Object} empleadoData Los datos del nuevo empleado.
-   * @returns {Promise<Object>} Una promesa que resuelve con el empleado creado.
+   * @param {Object} empleadoData - Datos del empleado
+   * @returns {Promise<Object>} Empleado creado
+   * @throws {Error} Si los datos son inválidos o falla la creación
    */
   async createEmpleado(empleadoData) {
+    if (!empleadoData || typeof empleadoData !== 'object') {
+      throw new Error('Datos de empleado no válidos');
+    }
+
     try {
       const response = await api.post(BASE_URL, empleadoData);
       return response.data;
     } catch (error) {
-      console.error('Error al crear empleado:', error);
-      throw error;
+      const errorMsg = 'Error al crear empleado';
+      console.error(errorMsg, error);
+      throw new Error(`${errorMsg}: ${error.response?.data?.message || error.message}`);
     }
   },
 
   /**
    * Actualiza un empleado existente.
-   * @param {number} id El ID del empleado a actualizar.
-   * @param {Object} empleadoData Los datos actualizados del empleado.
-   * @returns {Promise<void>} Una promesa que resuelve cuando el empleado ha sido actualizado.
+   * @param {number} id - ID del empleado
+   * @param {Object} empleadoData - Datos a actualizar
+   * @returns {Promise<Object>} Datos actualizados
+   * @throws {Error} Si el ID o datos son inválidos
    */
   async updateEmpleado(id, empleadoData) {
+    if (!id || isNaN(id)) {
+      throw new Error('ID de empleado no válido');
+    }
+    if (!empleadoData || typeof empleadoData !== 'object') {
+      throw new Error('Datos de empleado no válidos');
+    }
+
     try {
       const response = await api.put(`${BASE_URL}/${id}`, empleadoData);
-      return response.data; // La API devuelve NoContent (204) pero Axios aún devuelve response.data como vacío.
+      return response.data || { success: true }; // Manejo para endpoints que no devuelven data
     } catch (error) {
-      console.error(`Error al actualizar empleado con ID ${id}:`, error);
-      throw error;
+      const errorMsg = `Error al actualizar empleado con ID ${id}`;
+      console.error(errorMsg, error);
+      throw new Error(`${errorMsg}: ${error.response?.data?.message || error.message}`);
     }
   },
 
   /**
-   * Elimina un empleado por su ID.
-   * @param {number} id El ID del empleado a eliminar.
-   * @returns {Promise<void>} Una promesa que resuelve cuando el empleado ha sido eliminado.
+   * Elimina un empleado.
+   * @param {number} id - ID del empleado
+   * @returns {Promise<boolean>} True si fue eliminado
+   * @throws {Error} Si el ID no es válido o falla la eliminación
    */
   async deleteEmpleado(id) {
+    if (!id || isNaN(id)) {
+      throw new Error('ID de empleado no válido');
+    }
+
     try {
       await api.delete(`${BASE_URL}/${id}`);
+      return true;
     } catch (error) {
-      console.error(`Error al eliminar empleado con ID ${id}:`, error);
-      throw error;
+      const errorMsg = `Error al eliminar empleado con ID ${id}`;
+      console.error(errorMsg, error);
+      throw new Error(`${errorMsg}: ${error.response?.data?.message || error.message}`);
     }
   },
 };
