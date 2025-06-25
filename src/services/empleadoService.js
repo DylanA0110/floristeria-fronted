@@ -4,11 +4,7 @@ import api from './api';
 const BASE_URL = '/Empleado';
 
 export const empleadoService = {
-  /**
-   * Obtiene todos los empleados.
-   * @returns {Promise<Array>} Lista de empleados
-   * @throws {Error} Si falla la petición
-   */
+
   async getAllEmpleados() {
     try {
       const response = await api.get(BASE_URL);

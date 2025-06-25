@@ -17,13 +17,12 @@
           <input
             type="text"
             v-model="searchTerm"
-            @input="filterClientsLocal"
-            placeholder="Buscar por teléfono o nombre..."
-            class="px-3 py-3 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded text-sm border border-blueGray-300 outline-none focus:outline-none focus:ring w-full md:w-auto pr-10"
+            @input="filterClientesLocal"
+            placeholder="Buscar por nombre o teléfono..."
+            class="px-3 py-2 placeholder-blueGray-300 text-blueGray-600 bg-white rounded border border-blueGray-300 text-sm focus:outline-none focus:ring"
           />
           <button
-            class="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-xs px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150 ml-2"
-            type="button"
+            class="bg-emerald-500 text-white uppercase text-xs font-bold px-4 py-2 ml-2 rounded shadow hover:shadow-md outline-none focus:outline-none transition-all duration-150"
             @click="openAddModal"
           >
             Agregar Cliente
@@ -31,91 +30,38 @@
         </div>
       </div>
     </div>
+
     <div class="block w-full overflow-x-auto">
       <div v-if="isLoading" class="text-center py-4 text-blueGray-600">Cargando clientes...</div>
       <div v-if="error" class="text-center py-4 text-red-500">Error: {{ error }}</div>
 
-      <table v-if="!isLoading && !error" class="items-center w-full bg-transparent border-collapse">
-        <thead>
+      <table v-if="!isLoading && !error" class="w-full bg-transparent border-collapse">
+        <thead class="thead-light">
           <tr>
-            <th
-              class="px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left"
-              :class="[
-                color === 'light'
-                  ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100'
-                  : 'bg-emerald-800 text-emerald-300 border-emerald-700',
-              ]"
-            >
-              ID
-            </th>
-            <th
-              class="px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left"
-              :class="[
-                color === 'light'
-                  ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100'
-                  : 'bg-emerald-800 text-emerald-300 border-emerald-700',
-              ]"
-            >
-              Nombre del Cliente
-            </th>
-            <th
-              class="px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left"
-              :class="[
-                color === 'light'
-                  ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100'
-                  : 'bg-emerald-800 text-emerald-300 border-emerald-700',
-              ]"
-            >
-              Teléfono
-            </th>
-            <th
-              class="px-6 align-middle border border-solid py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left"
-              :class="[
-                color === 'light'
-                  ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100'
-                  : 'bg-emerald-800 text-emerald-300 border-emerald-700',
-              ]"
-            >
-              Acciones
-            </th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">ID Cliente</th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Nombre del Cliente</th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Teléfono</th>
+            <th class="px-6 py-3 text-xs uppercase font-semibold text-left" :class="[color === 'light' ? 'bg-blueGray-50 text-blueGray-500 border-blueGray-100' : 'bg-emerald-800 text-emerald-300 border-emerald-700']">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-if="filteredClients.length === 0 && !isLoading">
-            <td :colspan="4" class="text-center py-4 text-blueGray-500">
-              No hay clientes que coincidan con la búsqueda.
-            </td>
+          <tr v-if="paginatedClientes.length === 0 && !isLoading">
+            <td colspan="4" class="text-center py-4 text-blueGray-500">No hay clientes que coincidan con la búsqueda.</td>
           </tr>
-          <tr v-for="client in filteredClients" :key="client.Id_cliente">
-            <th
-              class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left"
-            >
-              {{ client.Id_cliente }}
-            </th>
-            <td
-              class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
-            >
-              {{ client.Nombre_Cliente }}
-            </td>
-            <td
-              class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4"
-            >
-              {{ client.Telefono || 'N/A' }}
-            </td>
-            <td
-              class="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-right"
-            >
+          <tr v-for="cli in paginatedClientes" :key="cli.id_cliente">
+            <td class="px-6 py-4 text-sm whitespace-nowrap">{{ cli.id_cliente }}</td>
+            <td class="px-6 py-4 text-sm whitespace-nowrap">{{ cli.Nombre_Cliente || 'N/A' }}</td>
+            <td class="px-6 py-4 text-sm whitespace-nowrap">{{ cli.Telefono || 'N/A' }}</td>
+            <td class="px-6 py-4 text-sm text-right whitespace-nowrap">
               <button
-                class="bg-blueGray-500 text-white active:bg-blueGray-600 font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 ease-linear transition-all duration-150"
-                type="button"
-                @click="openEditModal(client)"
+                class="bg-blueGray-500 text-white px-3 py-1 text-xs rounded hover:shadow-md"
+                @click="openEditModal(cli)"
               >
                 Editar
               </button>
               <button
-                class="bg-red-500 text-white active:bg-red-600 font-bold uppercase text-xs px-3 py-1 rounded shadow hover:shadow-md outline-none focus:outline-none ease-linear transition-all duration-150 ml-1"
-                type="button"
-                @click="confirmDelete(client.Id_cliente)"
+                class="bg-red-500 text-white px-3 py-1 text-xs ml-1 rounded hover:shadow-md"
+                @click="confirmDelete(cli.id_cliente)"
               >
                 Eliminar
               </button>
@@ -125,70 +71,86 @@
       </table>
     </div>
 
-    <div
-      v-if="showModal"
-      class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none"
-    >
-      <div class="relative w-auto my-6 mx-auto max-w-3xl">
-        <div
-          class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none"
-        >
-          <div
-            class="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t"
+    <div class="rounded-b mt-0 px-4 py-3 border-0" v-if="!isLoading && !error && filteredClientes.length > 0">
+      <div class="flex flex-wrap items-center justify-between">
+        <div class="text-xs text-blueGray-500">
+          Mostrando {{ paginatedClientes.length }} de {{ filteredClientes.length }} registros. Página {{ currentPage }} de {{ totalPages }}
+        </div>
+        <div class="flex">
+          <button
+            @click="prevPage"
+            :disabled="currentPage === 1"
+            class="bg-blueGray-200 text-blueGray-700 px-3 py-1 text-xs rounded-l hover:bg-blueGray-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
+            Anterior
+          </button>
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            class="bg-blueGray-200 text-blueGray-700 px-3 py-1 text-xs rounded-r border-l border-blueGray-300 hover:bg-blueGray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para agregar/editar cliente -->
+    <div v-if="showModal" class="fixed inset-0 bg-black opacity-25 z-40"></div>
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center">
+      <div class="relative w-auto max-w-md mx-auto">
+        <div class="bg-white rounded-lg shadow-lg">
+          <div class="flex items-start justify-between p-5 border-b">
             <h3 class="text-3xl font-semibold">
               {{ isEditing ? 'Editar Cliente' : 'Agregar Nuevo Cliente' }}
             </h3>
-            <button
-              class="p-1 ml-auto bg-transparent border-0 text-blueGray-600 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-              @click="closeModal"
-            >
-              <span class="text-blueGray-600 h-6 w-6 text-2xl block outline-none focus:outline-none">
-                ×
-              </span>
-            </button>
+            <button @click="closeModal" class="text-3xl leading-none">&times;</button>
           </div>
-          <div class="relative p-6 flex-auto">
-            <form @submit.prevent="submitClientForm">
+          <div class="p-6">
+            <form @submit.prevent="submitClienteForm">
               <div class="mb-4">
-                <label class="block text-blueGray-600 text-sm font-bold mb-2" for="nombreCliente">
-                  Nombre del Cliente
-                </label>
                 <input
-                  type="text"
-                  id="nombreCliente"
-                  v-model="currentClient.Nombre_Cliente"
-                  class="shadow appearance-none border rounded w-full py-2 px-3 text-blueGray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  v-model="currentCliente.Nombre_Cliente"
+                  placeholder="Nombre del Cliente *"
                   required
+                  class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
                 />
               </div>
               <div class="mb-4">
-                <label class="block text-blueGray-600 text-sm font-bold mb-2" for="telefono">
-                  Teléfono
-                </label>
                 <input
+                  v-model="currentCliente.Telefono"
                   type="tel"
-                  id="telefono"
-                  v-model="currentClient.Telefono"
-                  class="shadow appearance-none border rounded w-full py-2 px-3 text-blueGray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  required
+                  placeholder="Teléfono"
+                  class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
                 />
               </div>
-
-              <div
-                class="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b"
-              >
+              <div class="mb-a">
+                  <input
+                    v-model="currentCliente.id_cliente"
+                    type="number"
+                      placeholder="ID Cliente *"
+                      required
+                      class="shadow border rounded w-full px-3 py-2 text-blueGray-700"
+                      :disabled="isEditing"
+                    />
+                    <p v-if="submitted && !currentCliente.id_cliente && !isEditing" class="text-red-500 text-xs mt-1">
+                      El ID de Cliente es requerido
+                    </p>
+  
+              </div>
+              
+              <div class="flex justify-end pt-4 border-t">
                 <button
-                  class="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                   type="button"
                   @click="closeModal"
+                  class="mr-2 text-red-500 uppercase font-bold text-sm px-6 py-3 rounded"
                 >
                   Cancelar
                 </button>
                 <button
-                  class="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                   type="submit"
                   :disabled="isSaving"
+                  class="bg-emerald-500 text-white px-6 py-3 rounded uppercase font-bold text-sm"
                 >
                   {{ isSaving ? 'Procesando...' : (isEditing ? 'Guardar Cambios' : 'Agregar') }}
                 </button>
@@ -198,118 +160,152 @@
         </div>
       </div>
     </div>
-    <div v-if="showModal" class="opacity-25 fixed inset-0 z-40 bg-black"></div>
   </div>
 </template>
-<script>
-export default {
-  props: {
-    color: {
-      default: "light",
-      type: String,
-    },
-    // Datos que se pasarán desde el componente padre
-    clients: {
-      type: Array,
-      default: () => [],
-      required: true, // Se espera que el padre pase la lista de clientes
-    },
-    isLoading: { // Para indicar si los datos se están cargando (desde el padre)
-      type: Boolean,
-      default: false,
-    },
-    isSaving: { // Para indicar si una operación de guardar/eliminar está en curso (desde el padre)
-      type: Boolean,
-      default: false,
-    },
-    error: { // Para mostrar errores (desde el padre)
-      type: String,
-      default: null,
-    },
-  },
-  data() {
-    return {
-      searchTerm: '',
-      filteredClients: [], // Se calculará a partir de 'clients' prop y 'searchTerm'
-      showModal: false,
-      isEditing: false,
-      currentClient: { // Modelo para el formulario de agregar/editar
-        Id_cliente: null,
-        Telefono: '',
-        Nombre_Cliente: '',
-      },
-    };
-  },
-  watch: {
-    // Observa cambios en la prop 'clients' para recalcular el filtro
-    clients: {
-      handler() {
-        this.filterClientsLocal();
-      },
-      immediate: true, // Ejecutar la primera vez al montar el componente
-    },
-    // Observa cambios en el término de búsqueda para actualizar la tabla
-    searchTerm: {
-        handler() {
-            this.filterClientsLocal();
-        },
-        immediate: true,
+<script setup>
+import { ref, onMounted, computed, watch } from 'vue';
+import { useClientesStore } from '../../store/cliente.js';
+
+const props = defineProps({
+  color: { type: String, default: 'light' }
+});
+
+const store = useClientesStore();
+
+const clientes = computed(() => store.clientes);
+const isLoading = computed(() => store.isLoading);
+const isSaving = computed(() => store.isSaving);
+const error = computed(() => store.error);
+
+const searchTerm = ref('');
+const filteredClientes = ref([]);
+const currentPage = ref(1);
+const itemsPerPage = ref(8);
+
+const showModal = ref(false);
+const isEditing = ref(false);
+const currentCliente = ref({
+  id_cliente: null,
+  Nombre_Cliente: '',
+  Telefono: ''
+});
+
+// Cargar datos iniciales
+onMounted(async () => {
+  await store.fetchAllClientes();
+  filterClientesLocal();
+});
+
+// Observar cambios en clientes y término de búsqueda
+watch([clientes, searchTerm], () => {
+  filterClientesLocal();
+});
+
+// Calcular total de páginas
+const totalPages = computed(() => {
+  return Math.ceil(filteredClientes.value.length / itemsPerPage.value) || 1;
+});
+
+// Obtener clientes paginados
+const paginatedClientes = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return filteredClientes.value.slice(start, end);
+});
+
+// Filtrar clientes localmente
+function filterClientesLocal() {
+  const term = searchTerm.value.toLowerCase().trim();
+  if (!term) {
+    filteredClientes.value = [...(clientes.value || [])];
+  } else {
+    filteredClientes.value = (clientes.value || []).filter(cli =>
+      (cli.Nombre_Cliente?.toLowerCase().includes(term)) ||
+      (cli.Telefono?.includes(term))
+    );
+  }
+  currentPage.value = 1; // Resetear a primera página al filtrar
+}
+
+// Navegación de páginas
+function nextPage() {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++;
+  }
+}
+
+function prevPage() {
+  if (currentPage.value > 1) {
+    currentPage.value--;
+  }
+}
+
+// Manejo del modal
+function openAddModal() {
+  isEditing.value = false;
+  currentCliente.value = {
+    id_cliente: null,
+    Nombre_Cliente: '',
+    Telefono: ''
+  };
+  showModal.value = true;
+}
+
+function openEditModal(cli) {
+  isEditing.value = true;
+  currentCliente.value = {
+    id_cliente: cli.id_cliente,
+    Nombre_Cliente: cli.Nombre_Cliente || '',
+    Telefono: cli.Telefono || ''
+  };
+  showModal.value = true;
+}
+
+function closeModal() {
+  showModal.value = false;
+}
+
+// Enviar formulario
+async function submitClienteForm() 
+{
+   // Validación básica para modo edición
+    if (isEditing.value && !currentCliente.value.id_cliente) {
+        console.error('ID del cliente no definido para actualización');
+        return;
     }
-  },
-  methods: {
-    // --- Métodos para Abrir/Cerrar Modal y Preparar Datos ---
-    openAddModal() {
-      this.isEditing = false;
-      // Reinicia el formulario para un nuevo cliente
-      this.currentClient = {
-        Id_cliente: null,
-        Telefono: '',
-        Nombre_Cliente: '',
-      };
-      this.showModal = true;
-    },
-    openEditModal(client) {
-      this.isEditing = true;
-      // Clona el cliente
-      this.currentClient = {
-        ...client,
-      };
-      this.showModal = true;
-    },
-    closeModal() {
-      this.showModal = false;
-    },
 
-    // --- Métodos de Emisión de Eventos CRUD ---
-    submitClientForm() {
-      // Prepara el objeto cliente para enviarlo al componente padre
-      const clientData = { ...this.currentClient };
+    const clienteToSent = {
+      id_Cliente: currentCliente.value.id_cliente,
+      Nombre_Cliente:currentCliente.value.Nombre_Cliente,
+      telefono:currentCliente.value.Telefono
 
-      if (this.isEditing) {
-        this.$emit('edit-client', clientData);
-      } else {
-        this.$emit('add-client', clientData);
-      }
-      // El modal se cerrará cuando el padre reciba el evento y la operación sea exitosa
-      // o podrías cerrarlo aquí si prefieres, dependiendo del feedback.
-      // this.closeModal(); // Considerar cerrar aquí si la validación del formulario es solo frontal
-    },
-    confirmDelete(id) {
-      if (confirm('¿Estás seguro de que quieres eliminar este cliente? Esta acción no se puede deshacer.')) {
-        this.$emit('delete-client', id);
-      }
-    },
-    filterClientsLocal() {
-      if (!this.searchTerm) {
-        this.filteredClients = [...this.clients];
-      } else {
-        const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
-        this.filteredClients = this.clients.filter(client =>
-          client.Nombre_Cliente.toLowerCase().includes(lowerCaseSearchTerm) ||
-          client.Telefono.toLowerCase().includes(lowerCaseSearchTerm)
-        );
-      }
-    },
-  },
-};
+    }
+
+  try {
+    console.log(currentCliente.value.id_cliente, clienteToSent);
+    if (isEditing.value) {
+      await store.updateCliente(currentCliente.value.id_cliente, clienteToSent);
+    } else {
+      await store.addCliente(clienteToSent);
+    }
+    await store.fetchAllClientes();
+    filterClientesLocal();
+    closeModal();
+  } catch (error) {
+    console.error("Error al guardar cliente:", error);
+  }
+}
+
+// Confirmar eliminación
+function confirmDelete(id) {
+  if (confirm('¿Seguro que deseas eliminar este cliente?')) {
+    store.deleteCliente(id).then(async () => {
+      await store.fetchAllClientes();
+      filterClientesLocal();
+    });
+  }
+}
 </script>
+<style scoped>
+/* Estilos personalizados si son necesarios */
+</style>
